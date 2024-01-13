@@ -10,10 +10,10 @@ dotenv.config();
 const PORT: number = parseInt(process.env.PORT || "4000");
 app.use(
     cors({
-    //   origin: {
-    //     // this url and methods mean that this project is only access to this url and these methods only for security porpuse
-    //     URL: [process.env.FRONTEND_URL],
-    //   } as any,
+      origin: {
+        // this url and methods mean that this project is only access to this url and these methods only for security porpuse
+        URL: [process.env.FRONTEND_URL],
+      } as any,
       methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
       credentials: true,
     })
