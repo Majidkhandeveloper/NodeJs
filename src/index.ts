@@ -4,10 +4,10 @@ import cors from "cors";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import Connection from "./db/dbConfig";
+import UserLoginRoutes from "./routes/UserLoginRoutes";
 
 const app = express();
 dotenv.config();
-const PORT: number = parseInt(process.env.PORT || "4000");
 app.use(
     cors({
     //   origin: {
@@ -27,12 +27,13 @@ app.use("", express.static("uploads"));
 
 
 
+app.use("/api/v1/p2p",UserLoginRoutes )
 
 
 
 
 
-
+const PORT: number = parseInt(process.env.PORT || "4000");
 Connection.authenticate().then((err)=>{
     console.log("Connected successfully to the database.")
   }).catch((error)=>{
@@ -44,4 +45,7 @@ Connection.authenticate().then((err)=>{
     })
     .catch((error: any) => {
       console.error("An error occured while creating table", error);
+    })
+    app.listen(PORT, () => {
+      console.log(`server runs on PORT ${PORT}`);
     })

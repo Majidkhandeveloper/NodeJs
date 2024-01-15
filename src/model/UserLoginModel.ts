@@ -3,7 +3,7 @@ import Connection from "../db/dbConfig";
 
 
 
-export interface AgentUserProp {
+export interface UserLogingProp {
   user_id?: number;
   role_id?: number;
   f_name?: string;
@@ -16,9 +16,9 @@ export interface AgentUserProp {
  
 }
 
-class AgentUserModel extends Model<AgentUserProp> {}
+class UserLogingModel extends Model<UserLogingProp> {}
 
-AgentUserModel.init(
+UserLogingModel.init(
   {
     user_id: { type: DataTypes.BIGINT, primaryKey: true, autoIncrement: true },
     f_name: { type: DataTypes.STRING },
@@ -40,4 +40,4 @@ AgentUserModel.init(
 
 
 
-export default AgentUserModel;
+export default UserLogingModel;
