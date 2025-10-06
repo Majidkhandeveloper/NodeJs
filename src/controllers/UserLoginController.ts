@@ -10,7 +10,6 @@ export const CreateUserLogin = async (
   req: any,
   res: Response
 ): Promise<any> => {
-  console.log("req.body", req.body);
   const { email, password } = req.body;
   if (!email || !password) {
     return ErrorMessage(res, "Please enter email or password", 200);
@@ -67,28 +66,58 @@ export const CreateUserLogin = async (
   }
 };
 
-export const CreateUsers = async (req: any, res: Response): Promise<any> => {
-  const { password } = req.body;
+export const CreateUsers = async (req: Request, res: Response): Promise<any> => {
+  const { password, email } = req.body;
+  const ipAddress = req.ip
 
-  const hashPassword = await bcrypt.hash(password, 12);
   try {
-    const data = await UserLogingModel.create({
+    // 🔐 1. Hash password
+    const hashPassword = await bcrypt.hash(password, 12);
+
+    // 🧑‍💼 2. Create user in DB
+    const user = await UserLogingModel.create({
       ...req.body,
       password: hashPassword,
-    });
-    ResponseMessage(res, 200, "Create Succesfully", data);
+    }) as any;
+// console.log("useruseruseruseruser",user);
+
+    // 🔑 3. Generate JWT token
+    const token = jwt.sign(
+      { id: user.user_id, email: user.email, ipAddress },
+      process.env.SECRETE_KEY as string,
+      { expiresIn: "1d" }
+    );
+
+    // 🍪 4. Set token in cookie
+    const cookieOptions = {
+      httpOnly: true,
+      // secure: process.env.NODE_ENV === "production", // true in production
+      // sameSite: "lax" as const,
+      maxAge: 24 * 60 * 60 * 1000, // 1 day
+    };
+
+    res
+      .status(200)
+      .cookie("token", token, cookieOptions)
+      .json({
+        result: user,
+        token,
+        message: "User created and logged in successfully",
+      });
+
   } catch (error) {
     ErrorMessage(res, error, 400);
   }
 };
+
 
 export const GetAllUserLogin = async (
   req: any,
   res: Response
 ): Promise<void> => {
   try {
+   
     const data = await UserLogingModel.findAll();
-    console.log("Data", data);
     res.status(200).json(data);
     //   ResponseMessage(res, 200, data);
   } catch (error) {

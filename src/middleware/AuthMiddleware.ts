@@ -27,34 +27,72 @@
 //   }
 // };
 // export default protect;
+// import jwt from "jsonwebtoken";
+// import { Request, Response, NextFunction } from "express";
+// import UserLogingModel from "../model/UserLoginModel";
+// const { verify } = jwt;
+
+// const protect = async (req: any, res: Response, next: NextFunction) => {
+//   let { token } = req.cookies;
+
+//   if (!token) {
+//     return res.status(401).json({
+//       message: "no token authorised error",
+//     });
+//   }
+
+//   try {
+//     const validToken: any = verify(token, process.env.SECRETE_KEY as string);
+//     // this line mean to find a user by this token and remove password from it coz we will store it as a token
+//     // req.user = await Users.findById(validToken.id).select("-password");
+//     req.user = await UserLogingModel.findByPk(validToken.id, {
+//       attributes: { exclude: ["password"] },
+//     });
+
+//     // agent_id
+//     return next();
+//   } catch (error) {
+//     return res.status(401).json({
+//       message: "no token authorised error",
+//     });
+//   }
+// };
+
+// export default protect;
+
+
+
 import jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
 import UserLogingModel from "../model/UserLoginModel";
-const { verify } = jwt;
 
 const protect = async (req: any, res: Response, next: NextFunction) => {
-  let { token } = req.cookies;
-
-  if (!token) {
-    return res.status(401).json({
-      message: "no token authorised error",
-    });
-  }
-
   try {
-    const validToken: any = verify(token, process.env.SECRETE_KEY as string);
-    // this line mean to find a user by this token and remove password from it coz we will store it as a token
-    // req.user = await Users.findById(validToken.id).select("-password");
-    req.user = await UserLogingModel.findByPk(validToken.id, {
+    const token = req.cookies?.token;
+
+    if (!token) {
+      return res.status(401).json({ message: "No token provided" });
+    }
+
+    const decoded: any = jwt.verify(token, process.env.SECRETE_KEY!);
+
+    // Check if IP matches
+    const currentIp =
+      req.headers["x-forwarded-for"]?.toString().split(",")[0] || req.ip;
+
+    if (decoded.ipAddress !== currentIp) {
+      return res.status(403).json({ message: "IP address mismatch" });
+    }
+// console.log("Decoded user ID:", decoded);
+
+    // Optional: attach user to req (fetch if needed)
+      req.user = await UserLogingModel.findByPk(decoded.id, {
       attributes: { exclude: ["password"] },
     });
 
-    // agent_id
-    return next();
-  } catch (error) {
-    return res.status(401).json({
-      message: "no token authorised error",
-    });
+    next();
+  } catch (err) {
+    return res.status(401).json({ message: "Token is invalid or expired" });
   }
 };
 

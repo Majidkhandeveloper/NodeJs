@@ -8,8 +8,8 @@ import protect from "../middleware/AuthMiddleware";
 
 const routes = Router();
 
-routes.post("/post", protect, CreatePost);
-routes.get("/post", GetPost);
-routes.get("/editpost", GetEditPost);
+routes.post("/post/crete", protect, CreatePost);
+routes.get("/post/get", GetPost);
+routes.get("post/editpost", GetEditPost);
 
 export default routes;

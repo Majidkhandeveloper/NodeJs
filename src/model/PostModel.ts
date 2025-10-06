@@ -19,8 +19,8 @@ PostModel.init(
     post_id: { type: DataTypes.BIGINT, primaryKey: true, autoIncrement: true },
     title: { type: DataTypes.STRING },
     description: { type: DataTypes.STRING },
-    post_by: { type: DataTypes.INTEGER, defaultValue: null },
-    edite_by: { type: DataTypes.INTEGER, defaultValue: null },
+    post_by: { type: DataTypes.BIGINT, defaultValue: null },
+    edite_by: { type: DataTypes.BIGINT, defaultValue: null },
     created_at: { type: DataTypes.DATE, defaultValue: Date.now },
     updated_at: { type: DataTypes.DATE, defaultValue: Date.now },
   },
@@ -30,7 +30,6 @@ PostModel.init(
     modelName: "post",
   }
 );
-PostModel.hasMany(UserLogingModel);
 UserLogingModel.hasMany(PostModel, { foreignKey: "post_by" });
 PostModel.belongsTo(UserLogingModel, { foreignKey: "post_by", as: "PostBy" });
 
