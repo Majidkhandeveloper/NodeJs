@@ -32,6 +32,7 @@ app.use("", express.static("uploads"));
 app.use("/api/v1/p2p", UserLoginRoutes);
 app.use("/api/v1/p2p", PostRoutes); //explain a table relation with  a table twice post_by and edit_by id belon userLoinTable
 app.use("/api/v1/p2p",FlighSearchRoutes)
+
 // req.body {
 //   departingOn: '16-10-2025',
 //   locationDep: 'ISB-Islamabad International Airport',

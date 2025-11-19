@@ -8,6 +8,9 @@ import { Op } from "sequelize"; // Import Op from sequelize
 import request from "request"; // Import request module
 import * as xml2js from "xml2js"; // Import xml2js
 import { ErrorMessage } from "../Utils/ErrorMessage";
+import { getCustomRespBody } from "./getCustomRespBody";
+import { PythonShell } from "python-shell";
+import path from 'path';
 
 export const CreatFlightSearch = async (req: any, res: Response): Promise<any> => {
     const { gds } = req.body;
@@ -227,8 +230,8 @@ const hititNDCAvailability = async (req: Request, res: Response) => {
                 }
                 res.status(201).send({
                     message: response,
-                    // data: getCustomRespBody(shoppingResponse?.Response, item),
-                    data: shoppingResponse?.Response
+                    data: { setData: getCustomRespBody(shoppingResponse?.Response, item), rawData: shoppingResponse?.Response },
+                    // data: shoppingResponse?.Response
                 });
             };
             request(options, callback);
@@ -239,3 +242,37 @@ const hititNDCAvailability = async (req: Request, res: Response) => {
         return ErrorMessage(res, error, 500);
     }
 };
+
+
+export const GetPrediction = async (req: Request, res: Response): Promise<any> => {
+    try {
+        const symptoms = req.body;
+        console.log("symptoms", symptoms);
+        const options = {
+            pythonPath: './.venv/bin/python',   // path to venv python
+            pythonOptions: ['-u'],
+            scriptPath: path.join(__dirname, '..'), // go to project root where predict.py is
+          };
+
+        let pyshell = new PythonShell('predict.py', options);
+
+        pyshell.send(JSON.stringify({ symptoms }));
+
+        pyshell.on('message', (message) => {
+            res.json(JSON.parse(message));
+            console.log("message",message);
+            
+        });
+
+        pyshell.end((err) => {
+            if (err) {
+                console.error("PYTHON ERROR:", err);
+                res.status(500).json({ error: err.toString() });
+            }
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Prediction failed" });
+    }
+}
